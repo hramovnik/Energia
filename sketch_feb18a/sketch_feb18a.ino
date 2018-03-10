@@ -28,7 +28,7 @@ Mfrc522 mfrc522(CS,NRSTDP);
 unsigned char serNum[5];
 unsigned char blueTabletOne[] = {230,151,123,161,171};
 unsigned char blueTabletTwo[] = {38,49,127,161,201};
-
+int PIN_1_4 = 6;
 bool isValid(unsigned char * exemplarOne, unsigned char * exemplarTwo, int size){
   for(int i = 0; i < size; i++){
     if (exemplarOne[i] != exemplarTwo[i]) {return false;}
@@ -44,6 +44,9 @@ void setup()
   SPI.begin();
   digitalWrite(CS, LOW);                    // Initialize the card reader
   pinMode(RED_LED, OUTPUT);                 // Blink LED if card detected
+  pinMode(PIN_1_4, OUTPUT);
+  analogWrite(PIN_1_4, 255);
+  
   mfrc522.Init();  
 }
 
@@ -66,7 +69,7 @@ void loop()
   memcpy(serNum, str, 5);
   if (status == MI_OK)
   {
-    digitalWrite(RED_LED, HIGH);              // Card or tag detected!
+    // Card or tag detected!
     Serial.print("The card's number is: ");
     for(int i = 0; i < 5; i++){
       Serial.print(serNum[i]);
@@ -76,17 +79,19 @@ void loop()
 
     if (isValid(serNum, blueTabletOne, 5) || isValid(serNum, blueTabletTwo, 5)){
       Serial.println("Valid key");
-      for(int i = 0; i < 10; i++){
-        delay(50);
-        digitalWrite(RED_LED, LOW);
-        delay(50);
-        digitalWrite(RED_LED, HIGH);
-      }
+      analogWrite(RED_LED, 255);
+      analogWrite(PIN_1_4, 0);
     }else{
-      delay(1000);
+      analogWrite(PIN_1_4, 255);
+      analogWrite(RED_LED, 128);
     }
-    digitalWrite(RED_LED, LOW);
+     
+    delay(1000);
+  }else{
+    analogWrite(PIN_1_4, 255);
+    analogWrite(RED_LED, 0); 
   }
+  analogWrite(RED_LED, 0); 
   mfrc522.Halt();                         
 }
 
